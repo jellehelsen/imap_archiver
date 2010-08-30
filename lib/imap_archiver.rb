@@ -7,6 +7,8 @@ require "date"
 require "active_support/all"
 require "archiver"
 
-Version = '0.0.1'
 module ImapArchiver
+  Version = File.open(File.dirname(File.dirname(__FILE__))+"/VERSION", 'r') do |f|
+    f.read.strip
+  end
 end

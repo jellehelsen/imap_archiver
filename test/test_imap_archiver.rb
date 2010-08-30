@@ -90,5 +90,9 @@ class TestImapArchiver < Test::Unit::TestCase
       assert_equal([mock1], @archiver.folder_list)
     end
     
+    should "show the version" do
+      assert_not_nil(ImapArchiver::Version)
+      assert_equal('0.0.1', ImapArchiver::Version)
+    end
   end
 end
