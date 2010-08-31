@@ -2,12 +2,11 @@ require 'optparse'
 
 module ImapArchiver
   class CLI
-    def self.execute(stdout, arguments=[])
+    def self.execute(stdout,stdin, arguments=[])
 
       # NOTE: the option -p/--path= is given as an example, and should be replaced in your application.
-
       options = {
-        :path     => '~'
+        :config_file => "~/.imap_archiver.rb"
       }
       mandatory_options = %w(  )
 
@@ -26,18 +25,22 @@ module ImapArchiver
                 "Default: ~") { |arg| options[:path] = arg }
         opts.on("-h", "--help",
                 "Show this help message.") { stdout.puts opts; exit }
+        opts.on("-F PATH", "", String, "Configuration file", "Default: ~/.imap_archiver.yml"){|arg| options[:config_file] = arg}
         opts.parse!(arguments)
 
         if mandatory_options && mandatory_options.find { |option| options[option.to_sym].nil? }
           stdout.puts opts; exit
         end
       end
-
-      path = options[:path]
+      
+      Config.load_config(options[:config_file])
+      # path = options[:path]
+      
 
       # do stuff
       
-      stdout.puts "To update this executable, look in lib/imap_archiver/cli.rb"
+      # stdout.puts "To update this executable, look in lib/imap_archiver/cli.rb"
+      return 0
     end
   end
 end

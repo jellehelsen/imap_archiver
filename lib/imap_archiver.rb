@@ -6,9 +6,9 @@ require "net/imap"
 require "date"
 require "active_support/all"
 require "archiver"
-
+require "cli"
+require "config"
+require "ostruct"
 module ImapArchiver
-  Version = File.open(File.dirname(File.dirname(__FILE__))+"/VERSION", 'r') do |f|
-    f.read.strip
-  end
+  Version = File.exist?('VERSION') ? File.read('VERSION').strip : ""
 end

@@ -1,23 +1,14 @@
-Given /^I have no configuration file$/ do
-  pending # express the regexp above with the code you wish you had
+Given /^I have no file "([^"]*)"$/ do |filename|
+  `rm -f #{filename}` 
 end
 
-When /^I start the configuration wizard$/ do
-  pending # express the regexp above with the code you wish you had
+When /^I load the configuration file "([^"]*)"$/ do |filename|
+  ImapArchiver::Config.load_config(filename)
 end
 
-Then /^I should see "([^"]*)"$/ do |arg1|
-  pending # express the regexp above with the code you wish you had
-end
-
-When /^I enter "([^"]*)"$/ do |arg1|
-  pending # express the regexp above with the code you wish you had
-end
-
-When /^I press return$/ do
-  pending # express the regexp above with the code you wish you had
-end
-
-Then /^the wizard should have exited normaly$/ do
-  pending # express the regexp above with the code you wish you had
+Then /^the configuration ([^"]*) should be "([^"]*)"$/ do |key,value|
+  if value =~ /^\/.*\/$/
+    value = Regexp.compile(value.gsub("/",""))
+  end
+  ImapArchiver::Config.send(key).should == value
 end
