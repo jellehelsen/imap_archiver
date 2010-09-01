@@ -61,12 +61,16 @@ describe ImapArchiver::Archiver do
       @archiver.username = "user"
       @archiver.password = "password"
       @archiver.auth_mech = 'CRAM-MD5'
-      @archiver.expects(:connect)
+      @archiver.archive_folder = 'archive'
+      @archiver.base_folder = 'Public Folders'
+      # @archiver.expects(:connect)
+      @archiver.connection = stub_everything
     end
     it "should list all folders in folders_to_archive array" do
       @archiver.folders_to_archive = ["Public Folders/test1", "test2"]
-      @archiver.connection.expects(:list).with('',"Public Folders/test1")
-      @archiver.connection.expects(:list).with('',"test2")
+      @archiver.connection.expects(:list).with('',"Public Folders/test1").returns([stub(:name => 'Public Folders/test1')])
+      @archiver.connection.expects(:list).with('',"test2").returns([stub(:name => 'test2')])
+      @archiver.connection.expects(:search).times(4).returns([])
       @archiver.start
     end
     
@@ -91,7 +95,7 @@ describe ImapArchiver::Archiver do
     
     it "should strip the folder_list of non-existing mailboxes" do
       @archiver.folders_to_archive = ["Public Folders/test1", "test2"]
-      @archiver.connection.expects(:list).with('',"Public Folders/test1").returns(mock1 = mock())
+      @archiver.connection.expects(:list).with('',"Public Folders/test1").returns([mock1 = mock()])
       @archiver.connection.expects(:list).with('',"test2").returns(nil)
       @archiver.folder_list.should == [mock1]
     end  

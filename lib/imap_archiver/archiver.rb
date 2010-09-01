@@ -22,7 +22,7 @@ module ImapArchiver
       connect if connection.nil?
       if folders_to_archive.is_a? Array
         folders = folders_to_archive.map {|f| connection.list('',f)}
-        return folders.delete_if {|f| f.nil?}
+        return folders.delete_if(&:nil?).map(&:first)
       end
       if folders_to_archive.is_a? Regexp
         folders = connection.list("","*")
@@ -41,7 +41,7 @@ module ImapArchiver
     
     def archive_folder_between_dates(folder, since_date, before_date)
       tmp_folder = Pathname.new(folder).relative_path_from(Pathname.new(base_folder)).to_s
-      current_archive_folder = File.expand_path "#{archive_folder}/#{tmp_folder}/#{since_date.strftime("%b %Y")}"
+      current_archive_folder = "#{archive_folder}/#{tmp_folder}/#{since_date.strftime("%b %Y")}"
       # puts archive_folder
       conditions = ["SINCE", since_date.strftime("%d-%b-%Y"), "BEFORE", before_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]
       retry_count = 0
@@ -72,6 +72,8 @@ module ImapArchiver
           puts "Error archiving #{folder} to #{archive_folder}: #{e}"
           puts e.backtrace
         end
+        rescue Net::IMAP::NoResponseError => e
+          puts "#{e}: #{folder}"
       # rescue Exception => e
       #   retry_count += 1
       #   if retry_count < 3
