@@ -1,6 +1,31 @@
 = imap_archiver
 
-Description goes here.
+imap_archiver is a command line tool to archive messages on an imap server. 
+You tell it what folders to archive and where to archive it.
+For every folder that is archived a series of folders (one for each month) is created inside the archive folder.
+
+== Installing
+  gem install imap_archiver
+
+== Configuration
+
+Create a configuration file in ~/.imap_archiver.rb
+
+  ImapArchiver::Config.run do |config|
+     config.imap_server = 'imap.example.com'
+     config.username = 'jellehelsen'
+     config.password = "secret"
+     config.folders_to_archive = %w(Support Backuplogs)
+     config.archive_folder = 'Archive'
+     config.base_folder = 'Shared Folders' # part to strip of source folder name to get archive folder name
+     config.archive_folder_acl = {'jelle' => 'lrswpcd'}
+  end
+  
+== Known bugs
+
+The documentation is sparse to non-existing.
+It has only been tested against my own cyrus-imap server and a dovecot test server.
+For all unknown bugs: file an issue report! Creating a patch yourself helps in getting it fixed quickly. 
 
 == Note on Patches/Pull Requests
  
