@@ -6,7 +6,9 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "imap_archiver"
     gem.summary = %Q{Tool to archive lots of messages in an imap server}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.description = %Q{imap_archiver is a command line tool to archive messages on an imap server. 
+      You tell it what folders to archive and where to archive it.
+      For every folder that is archived a series of folders (one for each month) is created inside the archive folder.}
     gem.email = "jelle.helsen@hcode.be"
     gem.homepage = "http://github.com/jellehelsen/imap_archiver"
     gem.authors = ["Jelle Helsen"]
