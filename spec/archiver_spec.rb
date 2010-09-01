@@ -15,6 +15,7 @@ describe ImapArchiver::Archiver do
       @archiver.username = "user"
       @archiver.password = "password"
       @archiver.auth_mech = 'CRAM-MD5'
+      @archiver.base_folder = 'Public Folders'
     end
     
     it "should create and authenticate an imap connection when calling reconnect" do

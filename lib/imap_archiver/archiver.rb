@@ -40,8 +40,8 @@ module ImapArchiver
     end
     
     def archive_folder_between_dates(folder, since_date, before_date)
-      tmp_folder = Pathname.new(folder).relative_path_from(Pathname.new('Public Folders')).to_s
-      archive_folder = "Public Folders/Archief/#{tmp_folder}/#{since_date.strftime("%b %Y")}"
+      tmp_folder = Pathname.new(folder).relative_path_from(Pathname.new(base_folder)).to_s
+      current_archive_folder = File.expand_path "#{archive_folder}/#{tmp_folder}/#{since_date.strftime("%b %Y")}"
       # puts archive_folder
       conditions = ["SINCE", since_date.strftime("%d-%b-%Y"), "BEFORE", before_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]
       retry_count = 0
@@ -51,16 +51,16 @@ module ImapArchiver
         msgs_to_archive = connection.search(conditions)
         if msgs_to_archive.size > 0
           # puts "will archive #{msgs_to_archive.size} messages"
-          if connection.list("",archive_folder).nil?
-            connection.create(archive_folder)
+          if connection.list("",current_archive_folder).nil?
+            connection.create(current_archive_folder)
           end
-          connection.copy(msgs_to_archive, archive_folder)
+          connection.copy(msgs_to_archive, current_archive_folder)
           connection.store(msgs_to_archive, "+FLAGS",[:Deleted])
           @msg_count += msgs_to_archive.size
           connection.expunge
         end
         if connection.search(["BEFORE", since_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).size > 0
-          archive_folder_between_dates(folder,since_date - 1.month, since_date)
+          archive_folder_between_dates(folder,since_date.months_ago(1), since_date-1)
         end
       rescue IOError => e
         retry_count += 1
@@ -72,15 +72,15 @@ module ImapArchiver
           puts "Error archiving #{folder} to #{archive_folder}: #{e}"
           puts e.backtrace
         end
-      rescue Exception => e
-        retry_count += 1
-        if retry_count < 3
-          puts "retrying #{e}"
-          retry
-        else
-          puts "Error archiving #{folder} to #{archive_folder}: #{e}"
-          puts e.backtrace
-        end
+      # rescue Exception => e
+      #   retry_count += 1
+      #   if retry_count < 3
+      #     puts "retrying #{e}"
+      #     retry
+      #   else
+      #     puts "Error archiving #{folder} to #{archive_folder}: #{e}"
+      #     puts e.backtrace
+      #   end
       end
     end
     
