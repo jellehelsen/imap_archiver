@@ -19,12 +19,20 @@ describe ImapArchiver::Archiver do
     end
     
     it "should create and authenticate an imap connection when calling reconnect" do
-      connection = mock()
+      connection = mock(:capability => ["AUTH=CRAM-MD5"])
       Net::IMAP.expects(:new).with("mailserver").returns(connection)
       connection.expects(:authenticate).with("CRAM-MD5","user","password")
       @archiver.reconnect
     end
-        
+    
+    it "should fallback to plain login if no other authentication mechanisms are available" do
+      connection = mock()
+      Net::IMAP.expects(:new).with("mailserver").returns(connection)
+      connection.expects(:capability).returns(%w(AUTH=PLAIN AUTH=LOGIN))
+      connection.expects(:login).with("user","password")
+      @archiver.connect
+      
+    end
     it "should reconnect when calling connect" do
       @archiver.expects(:reconnect)
       @archiver.connect

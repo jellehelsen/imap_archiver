@@ -14,8 +14,15 @@ module ImapArchiver
     end
     
     def reconnect
-      self.connection = Net::IMAP.new(imap_server)
-      self.connection.authenticate(auth_mech,username,password)
+      self.connection = Net::IMAP.new(imap_server) rescue nil
+      capability = self.connection.capability rescue nil
+      if capability.detect {|c| c =~ /AUTH=(CRAM|DIGEST)-MD5/}
+        puts "loging in with #{auth_mech}"
+        self.connection.authenticate(auth_mech,username,password)
+      else
+        puts "plain login"
+        self.connection.login(username,password) rescue nil
+      end
     end
     
     def folder_list
@@ -53,6 +60,11 @@ module ImapArchiver
           # puts "will archive #{msgs_to_archive.size} messages"
           if connection.list("",current_archive_folder).nil?
             connection.create(current_archive_folder)
+            if connection.capability.include?("ACL")
+              self.archive_folder_acl.each do |key,value|
+                connection.setacl(current_archive_folder,key,value)
+              end
+            end
           end
           connection.copy(msgs_to_archive, current_archive_folder)
           connection.store(msgs_to_archive, "+FLAGS",[:Deleted])
@@ -73,7 +85,7 @@ module ImapArchiver
           puts e.backtrace
         end
         rescue Net::IMAP::NoResponseError => e
-          puts "#{e}: #{folder}"
+          puts "#{e}: #{folder}: #{e.backtrace.join("\n")}"
       # rescue Exception => e
       #   retry_count += 1
       #   if retry_count < 3

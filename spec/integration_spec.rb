@@ -12,6 +12,7 @@ describe "imap_archiver" do
          config.folders_to_archive = /^test/
          config.archive_folder = '/Archive/test'
          config.base_folder = ''
+         config.archive_folder_acl = {'jhelsen' => 'lrswpcda'}
       end
       """
       @config_file.close
@@ -22,7 +23,7 @@ describe "imap_archiver" do
     end
 
     before(:each) do
-      @connection = stub_everything()
+      @connection = stub_everything(:capability => %w(AUTH=CRAM-MD5 ACL))
       @expectation = Net::IMAP.expects(:new).with("imap.example.net").returns(@connection)
       @archive_date = Date.today.months_ago(3).beginning_of_month
     end
@@ -113,7 +114,7 @@ describe "imap_archiver" do
     end
     
     before(:each) do
-      @connection = stub_everything()
+      @connection = stub_everything(:capability => %w(AUTH=CRAM-MD5))
       @expectation = Net::IMAP.expects(:new).with("imap.example.net").returns(@connection)
       @archive_date = Date.today.months_ago(3).beginning_of_month
     end
