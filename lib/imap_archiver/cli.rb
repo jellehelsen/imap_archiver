@@ -19,10 +19,6 @@ module ImapArchiver
           Options are:
         BANNER
         opts.separator ""
-        opts.on("-p", "--path PATH", String,
-                "This is a sample message.",
-                "For multiple lines, add more strings.",
-                "Default: ~") { |arg| options[:path] = arg }
         opts.on("-h", "--help",
                 "Show this help message.") { stdout.puts opts; exit }
         opts.on("-F PATH", "", String, "Configuration file", "Default: ~/.imap_archiver.yml"){|arg| options[:config_file] = arg}
@@ -33,13 +29,9 @@ module ImapArchiver
         end
       end
       
-      Config.load_config(options[:config_file])
-      # path = options[:path]
+      # Config.load_config(options[:config_file])
+      Archiver.run(options[:config_file])
       
-
-      # do stuff
-      
-      # stdout.puts "To update this executable, look in lib/imap_archiver/cli.rb"
       return 0
     end
   end
