@@ -1,7 +1,7 @@
 require "ostruct"
 module ImapArchiver
   module Config
-    attr_accessor :imap_server, :username, :password, :auth_mech, :base_folder, :archive_folder, :folders_to_archive
+    attr_accessor :imap_server, :username, :password, :auth_mech, :base_folder, :archive_folder, :folders_to_archive, :archive_folder_acl
     
     # @@config_struct = ::OpenStruct.new({:imap_server => '', 
     #                                   :username => '',

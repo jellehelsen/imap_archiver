@@ -95,6 +95,17 @@ describe "imap_archiver" do
 
       ImapArchiver::CLI.execute(STDOUT,STDIN,["-F",@config_file.path])
     end
+  
+    it "should set the correct acl on newly created archive folders" do
+      @connection.expects(:list).with("","*").returns([mock1=stub(:name=>'testfolder'),mock2=stub(:name=>'foldertest')])
+      @connection.expects(:select).with('testfolder')
+      @connection.expects(:search).twice.returns([1,2],[])
+      @connection.expects(:list).with('',"/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}")
+      @connection.expects(:create).with("/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}")
+      @connection.expects(:setacl).with("/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}",'jhelsen','lrswpcda')
+      ImapArchiver::CLI.execute(STDOUT,STDIN,["-F",@config_file.path])
+      
+    end
   end
 
   describe "with configuration file with array folders_to_archive" do
