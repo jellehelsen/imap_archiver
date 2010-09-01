@@ -1,11 +1,11 @@
+require "config"
 module ImapArchiver
   class Archiver
-    attr_accessor :mailserver, :username, :password, :connection, :auth_mech, :base_folder, :archive_folder, :folders_to_archive
-    def initialize(mailserver,username,password,auth_mech="CRAM-MD5")
-      self.mailserver = mailserver
-      self.username   = username
-      self.password   = password
-      self.auth_mech  = auth_mech
+    include ::ImapArchiver::Config
+    attr_accessor :connection
+    def initialize(config_file)
+      self.load_config(config_file)
+      config_valid?
     end
     
     def connect
@@ -14,18 +14,19 @@ module ImapArchiver
     end
     
     def reconnect
-      self.connection = Net::IMAP.new(mailserver)
+      self.connection = Net::IMAP.new(imap_server)
       self.connection.authenticate(auth_mech,username,password)
     end
     
     def folder_list
+      connect if connection.nil?
       if folders_to_archive.is_a? Array
         folders = folders_to_archive.map {|f| connection.list('',f)}
         return folders.delete_if {|f| f.nil?}
       end
       if folders_to_archive.is_a? Regexp
         folders = connection.list("","*")
-        return folders.delete_if {|f| (f.name =~ folders_to_archive).nil?}
+        return folders.delete_if {|f| (f.name =~ folders_to_archive).nil? }
       end
       connection.list(base_folder,"*")
     end
@@ -83,5 +84,8 @@ module ImapArchiver
       end
     end
     
+    def self.run(config_file)
+      self.new(config_file).start
+    end    
   end
 end
