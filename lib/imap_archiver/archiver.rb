@@ -17,10 +17,10 @@ module ImapArchiver
       self.connection = Net::IMAP.new(imap_server) rescue nil
       capability = self.connection.capability rescue nil
       if capability.detect {|c| c =~ /AUTH=(CRAM|DIGEST)-MD5/}
-        puts "loging in with #{auth_mech}"
+        # puts "loging in with #{auth_mech}"
         self.connection.authenticate(auth_mech,username,password)
       else
-        puts "plain login"
+        # puts "plain login"
         self.connection.login(username,password) rescue nil
       end
     end
