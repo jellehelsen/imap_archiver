@@ -12,8 +12,6 @@ module ImapArchiver
 
       parser = OptionParser.new do |opts|
         opts.banner = <<-BANNER.gsub(/^          /,'')
-          This application is wonderful because...
-
           Usage: #{File.basename($0)} [options]
 
           Options are:

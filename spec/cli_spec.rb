@@ -6,9 +6,7 @@ describe ImapArchiver::CLI do
   end
   
   it "should display the help message" do
-    help_message = """This application is wonderful because...
-
-Usage: rspec [options]
+    help_message = """Usage: imap_archiver [options]
 
 Options are:
 
@@ -18,7 +16,8 @@ Options are:
                                      Default: ~/.imap_archiver.yml
 """
     io = StringIO.new
-    
+    # OptionParser.any_instance.expects(:program_name).returns('imap_archiver')
+    $0='imap_archiver'
     lambda { ImapArchiver::CLI.execute(io,STDIN,['-h']) }.should raise_error(SystemExit)
     io.string.should == help_message
   end
