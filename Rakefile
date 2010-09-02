@@ -12,10 +12,7 @@ begin
     gem.email = "jelle.helsen@hcode.be"
     gem.homepage = "http://github.com/jellehelsen/imap_archiver"
     gem.authors = ["Jelle Helsen"]
-    gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
-    gem.add_development_dependency "aruba", ">= 0"
-    gem.add_dependency 'activesupport', '>= 3.0.0'
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+    gem.add_bundler_dependencies
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
