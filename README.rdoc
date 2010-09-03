@@ -6,7 +6,7 @@ For every folder that is archived a series of folders (one for each month) is cr
 
 == Installing
   gem install imap_archiver
-
+  
 == Configuration
 
 Create a configuration file in ~/.imap_archiver.rb
@@ -15,17 +15,43 @@ Create a configuration file in ~/.imap_archiver.rb
      config.imap_server = 'imap.example.com'
      config.username = 'jellehelsen'
      config.password = "secret"
-     config.folders_to_archive = %w(Support Backuplogs)
+     config.folders_to_archive = ["Shared Folders/Support" "Shared Folders/Backuplogs" "Shared Folders/Info"]
      config.archive_folder = 'Archive'
      config.base_folder = 'Shared Folders' # part to strip of source folder name to get archive folder name
      config.archive_folder_acl = {'jelle' => 'lrswpcd'}
   end
   
+== How it works
+
+imap_archiver works by moving messages that are older then 3 months and that have been read and not flagged to a different folder. This helps in cleaning out public folders that get too big to work with.
+
+Consider the following folder structure:
+  + Shared Folders
+    - Support
+    - Backuplogs
+    - Info
+
+Given the configuration above, this would be archive as such:
+  + Archive
+    - Support
+      - Mar 2010
+      - Apr 2010
+      - ...
+    - Backuplogs
+      - Mar 2010
+      - Apr 2010
+      - ...
+
 == Known bugs
 
 The documentation is sparse to non-existing.
 It has only been tested against my own cyrus-imap server and a dovecot test server.
 For all unknown bugs: file an issue report! Creating a patch yourself helps in getting it fixed quickly. 
+
+== TODO
+
+* Make the archive period configurable
+* Make the archive folder name configurable
 
 == Note on Patches/Pull Requests
  
