@@ -1,6 +1,6 @@
 GIT
   remote: http://github.com/aslakhellesoy/cucumber.git
-  revision: d79ecee1fb68e664da26480ddfbe6dad65fec31e
+  revision: d79ecee
   specs:
     cucumber (0.9.0)
       builder (~> 2.1.2)

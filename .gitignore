@@ -20,3 +20,6 @@ pkg
 tmp
 ## PROJECT::SPECIFIC
 .rspec
+.bundle
+*.gemspec
+test_config.rb
