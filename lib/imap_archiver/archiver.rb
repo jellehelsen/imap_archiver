@@ -41,7 +41,7 @@ module ImapArchiver
     def start 
       folder_list.each do |folder|        
         since_date = Date.today.months_ago(3).beginning_of_month 
-        before_date= Date.today.months_ago(3).end_of_month 
+        before_date= Date.today.months_ago(2).beginning_of_month 
         archive_folder_between_dates(folder.name,since_date,before_date) #if folder.name =~ /^Public Folders\/Team\//
       end
     end
@@ -72,7 +72,7 @@ module ImapArchiver
           connection.expunge
         end
         if connection.search(["BEFORE", since_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).size > 0
-          archive_folder_between_dates(folder,since_date.months_ago(1), since_date-1)
+          archive_folder_between_dates(folder,since_date.prev_month, since_date)
         end
       rescue IOError => e
         retry_count += 1
