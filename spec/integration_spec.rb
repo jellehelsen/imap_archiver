@@ -65,7 +65,7 @@ describe "imap_archiver" do
       @connection.expects(:list).with("","*").returns([mock1=stub(:name=>'testfolder'),mock2=stub(:name=>'foldertest')])
       @connection.expects(:select).with('testfolder')
       # @connection.expects(:search).twice.returns([1,2],[])
-      @connection.expects(:search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.end_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
+      @connection.expects(:search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.next_month.beginning_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
       @connection.expects(:search).with(["BEFORE", @archive_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([])
 
       @connection.expects(:copy).with([1,2],"/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}")
@@ -87,10 +87,10 @@ describe "imap_archiver" do
     it "should search for messages older then the archiving period" do
       @connection.expects(:list).with("","*").returns([mock1=stub(:name=>'testfolder'),mock2=stub(:name=>'foldertest')])
       @connection.expects(:select).with('testfolder').twice
-      @connection.expects(:search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.end_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
+      @connection.expects(:search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.next_month.beginning_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
       @connection.expects(:search).with(["BEFORE", @archive_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([3,4])
       @archive_date = @archive_date.prev_month
-      @connection.expects(:search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.end_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
+      @connection.expects(:search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.next_month.beginning_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
       @connection.expects(:search).with(["BEFORE", @archive_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([])
 
       ImapArchiver::CLI.execute(STDOUT,STDIN,["-F",@config_file.path])
