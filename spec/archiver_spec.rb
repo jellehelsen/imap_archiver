@@ -108,4 +108,38 @@ describe ImapArchiver::Archiver do
       @archiver.folder_list.should == [mock1]
     end  
   end
+
+  describe "copying mails" do
+    before do
+      ImapArchiver::Config.expects(:load_config)
+      ImapArchiver::Archiver.any_instance.expects(:config_valid?)
+      @archiver = ImapArchiver::Archiver.new("configfile")
+      @archiver.imap_server = "mailserver"
+      @archiver.username = "user"
+      @archiver.password = "password"
+      @archiver.auth_mech = 'CRAM-MD5'
+      @archiver.archive_folder = 'archive'
+      @archiver.base_folder = 'Public Folders'
+      # @archiver.expects(:connect)
+      @archiver.connection = mock
+      @archiver.connection.stubs(:capability).returns([])
+      @archiver.connection.stubs(:list).returns(mock)
+      @archiver.connection.stubs(:select)
+      @archiver.connection.stubs(:store)
+      @archiver.connection.stubs(:expunge)
+      @archiver.instance_variable_set("@msg_count",0)
+    end
+
+    it "should copy archivable msgs" do
+      #@archiver.folders_to_archive = ["Public Folders/test1"]
+      #@archiver.connection.expects(:list).with('',"Public Folders/test1").returns([mock1 = mock(:name => "Public Folders/test1")])
+      since_date = Date.today.months_ago(3).beginning_of_month 
+      before_date= Date.today.months_ago(2).beginning_of_month 
+      conditions = ["SINCE", since_date.strftime("%d-%b-%Y"), "BEFORE", before_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]
+      @archiver.connection.expects(:search).with(conditions).returns([1..10000].to_a)
+      @archiver.connection.expects(:search).with(["BEFORE", since_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([])
+      @archiver.connection.expects(:copy).with([1..10000].to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.archive_folder_between_dates("Public Folders/test1",since_date,before_date) #if folder.name =~ /^Public Folders\/Team\//
+    end
+  end
 end
