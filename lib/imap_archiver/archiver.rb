@@ -1,9 +1,14 @@
+require "logger"
 require "config"
 module ImapArchiver
   class Archiver
     include ::ImapArchiver::Config
     attr_accessor :connection
-    def initialize(config_file)
+    def initialize(config_file,debug=false)
+      @logger = Logger.new(STDOUT)
+      if debug
+        @logger.level = Logger::DEBUG
+      end
       self.load_config(config_file)
       config_valid?
     end
@@ -98,7 +103,7 @@ module ImapArchiver
       end
     end
     
-    def self.run(config_file)
+    def self.run(config_file,debug=false)
       self.new(config_file).start
     end    
   end
