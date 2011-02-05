@@ -9,7 +9,7 @@ module ImapArchiver
       @logger.level = Logger::WARN
       if debug
         @logger.level = Logger::DEBUG
-        @Logger.debug "Debugging enabled."
+        @logger.debug "Debugging enabled."
       end
       @logger.debug "Loading config"
       self.load_config(config_file)
@@ -74,9 +74,11 @@ module ImapArchiver
         connection.select(folder)
         # puts "will search 1"
         msgs_to_archive = connection.search(conditions)
+        @logger.debug "#{msgs_to_archive.size} msgs to archive"
         if msgs_to_archive.size > 0
           @logger.debug "will archive #{msgs_to_archive.size} messages"
           if connection.list("",current_archive_folder).nil?
+            @logger.debug "creating archive folder #{current_archive_folder}"
             connection.create(current_archive_folder)
             if connection.capability.include?("ACL")
               self.archive_folder_acl.each do |key,value|
@@ -118,7 +120,7 @@ module ImapArchiver
     end
     
     def self.run(config_file,debug=false)
-      self.new(config_file).start
+      self.new(config_file,debug).start
     end    
   end
 end
