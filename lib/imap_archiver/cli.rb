@@ -6,7 +6,8 @@ module ImapArchiver
 
       # NOTE: the option -p/--path= is given as an example, and should be replaced in your application.
       options = {
-        :config_file => "~/.imap_archiver.rb"
+        :config_file => "~/.imap_archiver.rb",
+        :debug => false
       }
       mandatory_options = %w(  )
 
@@ -19,6 +20,7 @@ module ImapArchiver
         opts.separator ""
         opts.on("-h", "--help",
                 "Show this help message.") { stdout.puts opts; exit }
+        opts.on("-d", "--debug", "Enable debugging.") { options[:debug] = true}
         opts.on("-F PATH", "", String, "Configuration file", "Default: ~/.imap_archiver.yml"){|arg| options[:config_file] = arg}
         opts.parse!(arguments)
 
@@ -28,7 +30,7 @@ module ImapArchiver
       end
       
       # Config.load_config(options[:config_file])
-      Archiver.run(options[:config_file])
+      Archiver.run(options[:config_file],options[:debug])
       
       return 0
     end

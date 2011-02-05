@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe ImapArchiver::CLI do
   it "should start the archiver with the default config file if no options are given" do
-    ImapArchiver::Archiver.expects(:run).with('~/.imap_archiver.rb')
+    ImapArchiver::Archiver.expects(:run).with('~/.imap_archiver.rb',false)
     ImapArchiver::CLI.execute(STDOUT,STDIN,[])
   end
   
@@ -11,6 +11,7 @@ describe ImapArchiver::CLI do
 Options are:
 
     -h, --help                       Show this help message.
+    -d, --debug                      Enable debugging.
     -F PATH
                                      Configuration file
                                      Default: ~/.imap_archiver.yml
@@ -23,7 +24,7 @@ Options are:
   end
   
   it "should load the given config file" do
-    ImapArchiver::Archiver.expects(:run).with('/tmp/imap_archiver.rb')
+    ImapArchiver::Archiver.expects(:run).with('/tmp/imap_archiver.rb',false)
     ImapArchiver::CLI.execute(STDOUT,STDIN,%w(-F /tmp/imap_archiver.rb))
   end
 end
