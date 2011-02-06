@@ -37,14 +37,16 @@ describe "imap_archiver" do
     it "should select and search the matching mailboxes" do
       @connection.expects(:list).with("","*").returns([mock1=stub(:name=>'testfolder'),mock2=stub(:name=>'foldertest')])
       @connection.expects(:select).with('testfolder')
-      @connection.expects(:search).twice.returns([]) #search current range and before
+      @connection.expects(:search).returns([])
+      @connection.expects(:uid_search).returns([])
       ImapArchiver::CLI.execute(STDOUT,STDIN,["-F",@config_file.path])
     end
 
     it "should create a mailbox for archiving if it does not exist" do
       @connection.expects(:list).with("","*").returns([mock1=stub(:name=>'testfolder'),mock2=stub(:name=>'foldertest')])
       @connection.expects(:select).with('testfolder')
-      @connection.expects(:search).twice.returns([1,2],[])
+      @connection.expects(:search).returns([])
+      @connection.expects(:uid_search).returns([1,2])
       @connection.expects(:list).with('',"/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}")
       @connection.expects(:create).with("/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}")
 
@@ -54,7 +56,8 @@ describe "imap_archiver" do
     it "should not create a mailbox for archiving if it does  exist" do
       @connection.expects(:list).with("","*").returns([mock1=stub(:name=>'testfolder'),mock2=stub(:name=>'foldertest')])
       @connection.expects(:select).with('testfolder')
-      @connection.expects(:search).twice.returns([1,2],[])
+      @connection.expects(:search).returns([])
+      @connection.expects(:uid_search).returns([1,2])
       @connection.expects(:list).with('',"/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}").returns(stub_everything('archive folder'))
       @connection.expects(:create).never
 
@@ -65,10 +68,10 @@ describe "imap_archiver" do
       @connection.expects(:list).with("","*").returns([mock1=stub(:name=>'testfolder'),mock2=stub(:name=>'foldertest')])
       @connection.expects(:select).with('testfolder')
       # @connection.expects(:search).twice.returns([1,2],[])
-      @connection.expects(:search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.next_month.beginning_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
+      @connection.expects(:uid_search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.next_month.beginning_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
       @connection.expects(:search).with(["BEFORE", @archive_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([])
 
-      @connection.expects(:copy).with([1,2],"/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}")
+      @connection.expects(:uid_copy).with([1,2],"/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}")
 
       ImapArchiver::CLI.execute(STDOUT,STDIN,["-F",@config_file.path])
 
@@ -77,8 +80,9 @@ describe "imap_archiver" do
     it "should delete the copied messages" do
       @connection.expects(:list).with("","*").returns([mock1=stub(:name=>'testfolder'),mock2=stub(:name=>'foldertest')])
       @connection.expects(:select).with('testfolder')
-      @connection.expects(:search).twice.returns([1,2],[])
-      @connection.expects(:store).with([1,2],"+FLAGS",[:Deleted])
+      @connection.expects(:search).returns([])
+      @connection.expects(:uid_search).returns([1,2])
+      @connection.expects(:uid_store).with([1,2],"+FLAGS",[:Deleted])
       @connection.expects(:expunge)
       ImapArchiver::CLI.execute(STDOUT,STDIN,["-F",@config_file.path])
 
@@ -87,10 +91,10 @@ describe "imap_archiver" do
     it "should search for messages older then the archiving period" do
       @connection.expects(:list).with("","*").returns([mock1=stub(:name=>'testfolder'),mock2=stub(:name=>'foldertest')])
       @connection.expects(:select).with('testfolder').twice
-      @connection.expects(:search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.next_month.beginning_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
+      @connection.expects(:uid_search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.next_month.beginning_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
       @connection.expects(:search).with(["BEFORE", @archive_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([3,4])
       @archive_date = @archive_date.prev_month
-      @connection.expects(:search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.next_month.beginning_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
+      @connection.expects(:uid_search).with(["SINCE", @archive_date.strftime("%d-%b-%Y"), "BEFORE", @archive_date.next_month.beginning_of_month.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([1,2])
       @connection.expects(:search).with(["BEFORE", @archive_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([])
 
       ImapArchiver::CLI.execute(STDOUT,STDIN,["-F",@config_file.path])
@@ -99,7 +103,8 @@ describe "imap_archiver" do
     it "should set the correct acl on newly created archive folders" do
       @connection.expects(:list).with("","*").returns([mock1=stub(:name=>'testfolder'),mock2=stub(:name=>'foldertest')])
       @connection.expects(:select).with('testfolder')
-      @connection.expects(:search).twice.returns([1,2],[])
+      @connection.expects(:search).returns([])
+      @connection.expects(:uid_search).returns([1,2])
       @connection.expects(:list).with('',"/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}")
       @connection.expects(:create).with("/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}")
       @connection.expects(:setacl).with("/Archive/test/testfolder/#{@archive_date.strftime("%b %Y")}",'jhelsen','lrswpcda')
@@ -133,7 +138,8 @@ describe "imap_archiver" do
     it "should select and search the matching mailboxes" do
       @connection.expects(:list).with("","test1").returns([mock1=stub(:name=>'test1')])
       @connection.expects(:select).with('test1')
-      @connection.expects(:search).twice.returns([]) #search current range and before
+      @connection.expects(:uid_search).returns([]) #search current range 
+      @connection.expects(:search).returns([]) #and before
       ImapArchiver::CLI.execute(STDOUT,STDIN,["-F",@config_file.path])
     end
   end

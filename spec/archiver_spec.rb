@@ -41,11 +41,12 @@ describe ImapArchiver::Archiver do
     it "should reconnect when an IOError is raised during archiving" do
       @archiver.instance_variable_set(:@msg_count, 0)
       @archiver.connection.expects(:select).times(2)
-      @archiver.connection.expects(:search).times(3).returns([1],[1],[])
+      @archiver.connection.expects(:uid_search).times(2).returns([1],[1])
+      @archiver.connection.expects(:search).returns([])
       @archiver.connection.expects(:list).times(2).returns(true)
-      @archiver.connection.stubs(:copy).raises(IOError).then.returns(nil)
+      @archiver.connection.stubs(:uid_copy).raises(IOError).then.returns(nil)
       @archiver.expects(:reconnect).times(1)
-      @archiver.connection.expects(:store)
+      @archiver.connection.expects(:uid_store)
       @archiver.connection.expects(:expunge)
       @archiver.archive_folder_between_dates('Public Folders/test',Date.today,Date.today)
     end
@@ -78,7 +79,8 @@ describe ImapArchiver::Archiver do
       @archiver.folders_to_archive = ["Public Folders/test1", "test2"]
       @archiver.connection.expects(:list).with('',"Public Folders/test1").returns([stub(:name => 'Public Folders/test1')])
       @archiver.connection.expects(:list).with('',"test2").returns([stub(:name => 'test2')])
-      @archiver.connection.expects(:search).times(4).returns([])
+      @archiver.connection.expects(:search).times(2).returns([])
+      @archiver.connection.expects(:uid_search).times(2).returns([])
       @archiver.start
     end
     
@@ -125,7 +127,7 @@ describe ImapArchiver::Archiver do
       @archiver.connection.stubs(:capability).returns([])
       @archiver.connection.stubs(:list).returns(mock)
       @archiver.connection.stubs(:select)
-      @archiver.connection.stubs(:store)
+      #@archiver.connection.stubs(:store)
       @archiver.connection.stubs(:expunge)
       @archiver.instance_variable_set("@msg_count",0)
     end
@@ -136,18 +138,30 @@ describe ImapArchiver::Archiver do
       since_date = Date.today.months_ago(3).beginning_of_month 
       before_date= Date.today.months_ago(2).beginning_of_month 
       conditions = ["SINCE", since_date.strftime("%d-%b-%Y"), "BEFORE", before_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]
-      @archiver.connection.expects(:search).with(conditions).returns((1..996).to_a)
+      @archiver.connection.expects(:uid_search).with(conditions).returns((1..996).to_a)
       @archiver.connection.expects(:search).with(["BEFORE", since_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).returns([])
-      @archiver.connection.expects(:copy).with((1..100).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
-      @archiver.connection.expects(:copy).with((101..200).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
-      @archiver.connection.expects(:copy).with((201..300).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
-      @archiver.connection.expects(:copy).with((301..400).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
-      @archiver.connection.expects(:copy).with((401..500).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
-      @archiver.connection.expects(:copy).with((501..600).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
-      @archiver.connection.expects(:copy).with((601..700).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
-      @archiver.connection.expects(:copy).with((701..800).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
-      @archiver.connection.expects(:copy).with((801..900).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
-      @archiver.connection.expects(:copy).with((901..996).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.connection.expects(:uid_copy).with((1..100).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.connection.expects(:uid_copy).with((101..200).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.connection.expects(:uid_copy).with((201..300).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.connection.expects(:uid_copy).with((301..400).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.connection.expects(:uid_copy).with((401..500).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.connection.expects(:uid_copy).with((501..600).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.connection.expects(:uid_copy).with((601..700).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.connection.expects(:uid_copy).with((701..800).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.connection.expects(:uid_copy).with((801..900).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      @archiver.connection.expects(:uid_copy).with((901..996).to_a, "archive/test1/#{since_date.strftime("%b %Y")}")
+      
+      @archiver.connection.expects(:uid_store).with((1..100).to_a,   "+FLAGS",[:Deleted])
+      @archiver.connection.expects(:uid_store).with((101..200).to_a, "+FLAGS",[:Deleted])
+      @archiver.connection.expects(:uid_store).with((201..300).to_a, "+FLAGS",[:Deleted])
+      @archiver.connection.expects(:uid_store).with((301..400).to_a, "+FLAGS",[:Deleted])
+      @archiver.connection.expects(:uid_store).with((401..500).to_a, "+FLAGS",[:Deleted])
+      @archiver.connection.expects(:uid_store).with((501..600).to_a, "+FLAGS",[:Deleted])
+      @archiver.connection.expects(:uid_store).with((601..700).to_a, "+FLAGS",[:Deleted])
+      @archiver.connection.expects(:uid_store).with((701..800).to_a, "+FLAGS",[:Deleted])
+      @archiver.connection.expects(:uid_store).with((801..900).to_a, "+FLAGS",[:Deleted])
+      @archiver.connection.expects(:uid_store).with((901..996).to_a, "+FLAGS",[:Deleted])
+    
       @archiver.archive_folder_between_dates("Public Folders/test1",since_date,before_date) #if folder.name =~ /^Public Folders\/Team\//
       @archiver.instance_variable_get("@msg_count").should == 996
     end
