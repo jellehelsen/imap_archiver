@@ -86,9 +86,11 @@ module ImapArchiver
               end
             end
           end
-          connection.copy(msgs_to_archive, current_archive_folder)
-          connection.store(msgs_to_archive, "+FLAGS",[:Deleted])
-          @msg_count += msgs_to_archive.size
+          while !msgs_to_archive.empty? && (msgs = msgs_to_archive.slice!(0,100))
+            connection.copy(msgs, current_archive_folder)
+            connection.store(msgs, "+FLAGS",[:Deleted])
+            @msg_count += msgs.size
+          end
           connection.expunge
         end
         if connection.search(["BEFORE", since_date.strftime("%d-%b-%Y"), "SEEN", "NOT", "FLAGGED"]).size > 0
