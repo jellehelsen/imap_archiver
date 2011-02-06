@@ -73,7 +73,7 @@ module ImapArchiver
       begin
         connection.select(folder)
         # puts "will search 1"
-        msgs_to_archive = connection.search(conditions)
+        msgs_to_archive = connection.uid_search(conditions)
         @logger.debug "#{msgs_to_archive.size} msgs to archive"
         if msgs_to_archive.size > 0
           @logger.debug "will archive #{msgs_to_archive.size} messages"
@@ -87,8 +87,8 @@ module ImapArchiver
             end
           end
           while !msgs_to_archive.empty? && (msgs = msgs_to_archive.slice!(0,100))
-            connection.copy(msgs, current_archive_folder)
-            connection.store(msgs, "+FLAGS",[:Deleted])
+            connection.uid_copy(msgs, current_archive_folder)
+            connection.uid_store(msgs, "+FLAGS",[:Deleted])
             @msg_count += msgs.size
           end
           connection.expunge
