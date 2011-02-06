@@ -90,7 +90,7 @@ module ImapArchiver
             connection.uid_copy(msgs, current_archive_folder)
             connection.uid_store(msgs, "+FLAGS",[:Deleted])
             @msg_count += msgs.size
-            @logger.info "archived #{msg_count} messages"
+            @logger.info "archived #{@msg_count} messages"
           end
           connection.expunge
         end
